@@ -22,6 +22,7 @@
   "homepage": "https://github.com/hashdotlee/reading-bot#readme",
   "dependencies": {
     "discord.js": "^14.3.0",
-    "dotenv": "^16.0.2"
+    "dotenv": "^16.0.2",
+    "pg": "^8.8.0"
   }
 }
