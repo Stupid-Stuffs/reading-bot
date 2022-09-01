@@ -2,8 +2,11 @@
   "name": "reading-bot",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "prebuild": "rimraf dist",
+    "start:dev": "npm run -s watch:dist",
+    "watch:dist": "nodemon dist/main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
