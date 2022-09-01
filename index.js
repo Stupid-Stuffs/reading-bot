@@ -7,8 +7,6 @@ client.on("ready", () => {
 });
 
 client.on("messageCreate", async (message) => {
-  console.log("message created");
-  console.log(message);
   if (message.content === "ping") {
     await message.reply("Pong!");
   }

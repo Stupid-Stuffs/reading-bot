@@ -2,7 +2,7 @@
   "name": "reading-bot",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/main.js",
+  "main": "index.js",
   "scripts": {
     "prebuild": "rimraf dist",
     "start:dev": "npm run -s watch:dist",
