@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, userMention } = require("discord.js");
+const { SlashCommandBuilder, bold, EmbedBuilder, userMention } = require("discord.js");
 
 const db = require("../DB");
 
