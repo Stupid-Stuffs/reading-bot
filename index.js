@@ -1,6 +1,11 @@
 require("dotenv").config();
 var CronJob = require("cron").CronJob;
-const { createAudioPlayer, NoSubscriberBehavior } = require("@discordjs/voice");
+const {
+  createAudioPlayer,
+  NoSubscriberBehavior,
+  VoiceConnectionStatus,
+  AudioPlayerStatus,
+} = require("@discordjs/voice");
 
 const fs = require("node:fs");
 const path = require("node:path");
