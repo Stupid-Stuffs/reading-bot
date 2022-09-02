@@ -183,11 +183,7 @@ client.on("interactionCreate", async (interaction) => {
         guildId: interaction.channel.guild.id,
         adapterCreator: interaction.channel.guild.voiceAdapterCreator,
       });
-      const subscription = connection.subscribe(audioPlayer);
-      if (subscription) {
-        // Unsubscribe after 5 seconds (stop playing audio on the voice connection)
-        setTimeout(() => subscription.unsubscribe(), 5000);
-      }
+
       connection.on(VoiceConnectionStatus.Ready, () => {
         console.log(
           "The connection has entered the Ready state - ready to play audio!"
