@@ -42,7 +42,7 @@ for (const file of commandFiles) {
   client.commands.set(command.data.name, command);
 }
 
-const player = createAudioResource({
+const player = createAudioPlayer({
   behaviors: {
     noSubscriber: NoSubscriberBehavior.Play,
   },
