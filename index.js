@@ -5,6 +5,7 @@ const {
   NoSubscriberBehavior,
   VoiceConnectionStatus,
   AudioPlayerStatus,
+  createAudioResource,
 } = require("@discordjs/voice");
 
 const fs = require("node:fs");
@@ -41,7 +42,7 @@ for (const file of commandFiles) {
   client.commands.set(command.data.name, command);
 }
 
-const player = createAudioPlayer({
+const player = createAudioResource({
   behaviors: {
     noSubscriber: NoSubscriberBehavior.Play,
   },
