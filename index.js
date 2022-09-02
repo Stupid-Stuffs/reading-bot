@@ -53,7 +53,12 @@ const player = createAudioPlayer({
 player.on(AudioPlayerStatus.Playing, () => {
   console.log("The audio player has started playing!");
 });
-const rain_resource = createAudioResource("./sounds/rain.mp3");
+const rain_resource = createAudioResource("./sounds/rain.mp3", {
+  inlineVolume: true,
+  metadata: {
+    title: "Rain and thunder sounds",
+  },
+});
 
 // connect DB
 const db = require("./DB");
