@@ -53,12 +53,6 @@ const player = createAudioPlayer({
 player.on(AudioPlayerStatus.Playing, () => {
   console.log("The audio player has started playing!");
 });
-const rain_resource = createAudioResource("./sounds/rain.mp3", {
-  inlineVolume: true,
-  metadata: {
-    title: "Rain and thunder sounds",
-  },
-});
 
 // connect DB
 const db = require("./DB");
@@ -71,7 +65,7 @@ const {
 const channels = new Set();
 
 var job = new CronJob(
-  "0 22 * * * *",
+  "0 0 22 * * *",
   async function () {
     const { rows } = await db.query(
       `SELECT * 
@@ -211,6 +205,12 @@ client.on("interactionCreate", async (interaction) => {
         }
       );
       if (interaction.options.getString("type") === "rain") {
+        const rain_resource = createAudioResource("./sounds/rain.mp3", {
+          inlineVolume: true,
+          metadata: {
+            title: "Rain and thunder sounds",
+          },
+        });
         player.play(rain_resource);
         player.on("error", (error) => {
           console.error(
