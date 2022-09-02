@@ -6,6 +6,7 @@ const {
   VoiceConnectionStatus,
   AudioPlayerStatus,
   createAudioResource,
+  joinVoiceChannel,
 } = require("@discordjs/voice");
 
 const fs = require("node:fs");
