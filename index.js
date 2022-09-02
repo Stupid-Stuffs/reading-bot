@@ -37,7 +37,11 @@ for (const file of commandFiles) {
 
 // connect DB
 const db = require("./DB");
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder } = require("@discordjs/builders");
+const {
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+} = require("@discordjs/builders");
 
 const channels = new Set();
 
@@ -57,7 +61,7 @@ var job = new CronJob(
       .addFields(
         ...rows.map((item) => {
           const timeDiffer =
-            new Date(item.finishedAt).getTime() - new Date().getTime();
+            new Date(item.due_time).getTime() - new Date().getTime();
           return {
             name: `📖 ${bold(item.title)}`,
             value: `${userMention(item.id)} - ${Math.round(
@@ -171,7 +175,10 @@ client.on("interactionCreate", async (interaction) => {
   if (interaction.type !== InteractionType.ApplicationCommandAutocomplete)
     return;
 
-  if (interaction.commandName === "review") {
+  if (
+    interaction.commandName === "review" ||
+    interaction.commandName === "finish"
+  ) {
     const focusedValue = interaction.options.getFocused();
     const { rows } = await db.query(`SELECT id, title FROM books`);
     const filtered = rows.filter((choice) =>

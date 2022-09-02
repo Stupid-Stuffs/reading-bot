@@ -31,7 +31,7 @@ module.exports = {
     const finish_at = new_date;
     try {
       await db.query(
-        `INSERT INTO books (title, user_id, "finishedAt") 
+        `INSERT INTO books (title, user_id, due_time) 
 		  VALUES ($1, $2, $3) 
 		  `,
         [book_title, user_id, finish_at]

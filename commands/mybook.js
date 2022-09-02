@@ -27,7 +27,7 @@ module.exports = {
       .setFields(
         ...rows.map((item) => {
           const timeDiffer =
-            new Date(item.finishedAt).getTime() - new Date().getTime();
+            new Date(item.due_time).getTime() - new Date().getTime();
           return {
             name: `📖 ${bold(item.title)}`,
             value: `${userMention(item.id)} - ${Math.ceil(
