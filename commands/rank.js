@@ -14,7 +14,7 @@ module.exports = {
     const { rows: users } = await db.query(
       `SELECT * 
 		  FROM users
-		  ORDER BY points
+		  ORDER BY points DESC
 		  LIMIT 3
 		`
     );
