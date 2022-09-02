@@ -1,5 +1,6 @@
 require("dotenv").config();
 var CronJob = require("cron").CronJob;
+const { createAudioPlayer, NoSubscriberBehavior } = require("@discordjs/voice");
 
 const fs = require("node:fs");
 const path = require("node:path");
@@ -34,6 +35,21 @@ for (const file of commandFiles) {
   // With the key as the command name and the value as the exported module
   client.commands.set(command.data.name, command);
 }
+
+const player = createAudioPlayer({
+  behaviors: {
+    noSubscriber: NoSubscriberBehavior.Play,
+  },
+});
+
+player.on(AudioPlayerStatus.Playing, () => {
+  console.log("The audio player has started playing!");
+});
+const rain_resource = createAudioResource("./sounds/rain.mp3", {
+  metadata: {
+    title: "Rain and thunder sounds!",
+  },
+});
 
 // connect DB
 const db = require("./DB");
@@ -158,6 +174,48 @@ client.on("interactionCreate", async (interaction) => {
   if (!command) return;
 
   try {
+    if (interaction.commandName === "play") {
+      const connection = joinVoiceChannel({
+        channelId: interaction.channel.id,
+        guildId: interaction.channel.guild.id,
+        adapterCreator: interaction.channel.guild.voiceAdapterCreator,
+      });
+      const subscription = connection.subscribe(audioPlayer);
+      if (subscription) {
+        // Unsubscribe after 5 seconds (stop playing audio on the voice connection)
+        setTimeout(() => subscription.unsubscribe(), 5000);
+      }
+      connection.on(VoiceConnectionStatus.Ready, () => {
+        console.log(
+          "The connection has entered the Ready state - ready to play audio!"
+        );
+      });
+      connection.on(
+        VoiceConnectionStatus.Disconnected,
+        async (oldState, newState) => {
+          try {
+            await Promise.race([
+              entersState(connection, VoiceConnectionStatus.Signalling, 5_000),
+              entersState(connection, VoiceConnectionStatus.Connecting, 5_000),
+            ]);
+            // Seems to be reconnecting to a new channel - ignore disconnect
+          } catch (error) {
+            // Seems to be a real disconnect which SHOULDN'T be recovered from
+            connection.destroy();
+          }
+        }
+      );
+      if (interaction.options.getString("type") === "rain") {
+        player.play(rain_resource);
+        player.on("error", (error) => {
+          console.error(
+            `Error: ${error.message} with resource ${error.resource.metadata.title}`
+          );
+          player.play(getNextResource());
+        });
+        connection.subscribe(player);
+      }
+    }
     await command.execute(interaction);
     if (interaction.commandName === "init") {
       channels.add(interaction.channelId);
