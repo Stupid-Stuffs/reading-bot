@@ -17,7 +17,7 @@ module.exports = {
     const data = interaction.options.data;
     const user_id = interaction.user.id;
     await db.query(
-      "UPDATE books SET is_finished = true, finishedAt = $3 WHERE id = $1 AND user_id=$2",
+      `UPDATE books SET is_finished = true, "finishedAt" = $3 WHERE id = $1 AND user_id=$2`,
       [data[0].value, user_id, new Date()]
     );
     await db.query(
