@@ -3,12 +3,21 @@ var CronJob = require("cron").CronJob;
 
 const fs = require("node:fs");
 const path = require("node:path");
-const { Client, GatewayIntentBits, Collection } = require("discord.js");
+const {
+  bold,
+  userMention,
+  Client,
+  GatewayIntentBits,
+  Collection,
+  InteractionType,
+  ButtonStyle,
+} = require("discord.js");
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
+    GatewayIntentBits.DirectMessages,
   ],
 });
 
@@ -28,16 +37,104 @@ for (const file of commandFiles) {
 
 // connect DB
 const db = require("./DB");
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder } = require("@discordjs/builders");
+
+const channels = new Set();
 
 var job = new CronJob(
-  "15 * * * * *",
+  "0 22 * * * *",
   async function () {
     const { rows } = await db.query(
       `SELECT * 
-		  FROM books
-		  WHERE is_finished = false`
+		  FROM books, users
+		  WHERE is_finished = false
+		  AND books.user_id = users.id
+		`
     );
-    // console.log(rows);
+    const embeded1 = new EmbedBuilder()
+      .setTitle("Reading List")
+      .setColor(0xef720b)
+      .addFields(
+        ...rows.map((item) => {
+          const timeDiffer =
+            new Date(item.finishedAt).getTime() - new Date().getTime();
+          return {
+            name: `📖 ${bold(item.title)}`,
+            value: `${userMention(item.id)} - ${Math.round(
+              Math.abs(timeDiffer) / (1000 * 3600 * 24)
+            )} ${timeDiffer > 0 ? "days remaining" : "overdue"}`,
+          };
+        })
+      )
+      .setTimestamp();
+    if (new Date().getDate() === 30) {
+      const { rows: users } = await db.query(
+        `SELECT * 
+		  FROM users
+		  ORDER BY points
+		  LIMIT 3
+		`
+      );
+      const embeded2 = new EmbedBuilder()
+        .setTitle("Reading List")
+        .setColor(0xef720b)
+        .addFields(
+          {
+            name: `🥇 ${userMention(users[0].id)}`,
+            value: `${users[0].points} points`,
+          },
+          {
+            name: `🥈 ${userMention(users[1].id)}`,
+            value: `${users[1].points} points`,
+          },
+          {
+            name: `🥉 ${userMention(users[2].id)}`,
+            value: `${users[2].points} points`,
+          }
+        )
+        .setTimestamp();
+      channels.forEach((channelId) =>
+        client.channels.cache
+          .get(channelId)
+          .send({ embeds: [embeded2] })
+          .then((mess) => console.log(mess))
+          .catch((err) => console.log(err))
+      );
+    }
+
+    const embeded3 = new EmbedBuilder().setTitle("What's news!").addFields(
+      { name: "What you read today?", value: "\u200B" },
+      { name: "What you read next?", value: "\u200B" },
+      {
+        name: "Can you share your thought about your reading today?",
+        value: "\u200B",
+      }
+    );
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId("review")
+        .setLabel("Review!")
+        .setStyle(ButtonStyle.Primary),
+      new ButtonBuilder()
+        .setCustomId("addBook")
+        .setLabel("Init Book!")
+        .setStyle(ButtonStyle.Primary)
+    );
+
+    channels.forEach((channelId) =>
+      client.channels.cache
+        .get(channelId)
+        .send({ embeds: [embeded1] })
+        .then((mess) => console.log(mess))
+        .catch((err) => console.log(err))
+    );
+    channels.forEach((channelId) =>
+      client.channels.cache
+        .get(channelId)
+        .send({ embeds: [embeded3], components: [row] })
+        .then((mess) => console.log(mess))
+        .catch((err) => console.log(err))
+    );
   },
   null,
   false,
@@ -49,20 +146,6 @@ client.on("ready", () => {
   job.start();
 });
 
-client.on("messageCreate", async (message) => {
-  console.log(message);
-  let r = /^Read\s\"(\D+)\"\sin\s([0-3][0-9])\sdays/;
-  let m = "";
-  if ((m = message.content.match(r))) {
-    const book_title = m[1];
-    const num_of_days = Number(m[2]);
-    const new_date = new Date();
-    const finish_at = new Date(
-      new_date.setDate(new_date.getDate() + num_of_days)
-    );
-  }
-});
-
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
@@ -72,12 +155,34 @@ client.on("interactionCreate", async (interaction) => {
 
   try {
     await command.execute(interaction);
+    if (interaction.commandName === "init") {
+      channels.add(interaction.channelId);
+    }
   } catch (error) {
     console.error(error);
     await interaction.reply({
       content: "There was an error while executing this command!",
       ephemeral: true,
     });
+  }
+});
+
+client.on("interactionCreate", async (interaction) => {
+  if (interaction.type !== InteractionType.ApplicationCommandAutocomplete)
+    return;
+
+  if (interaction.commandName === "review") {
+    const focusedValue = interaction.options.getFocused();
+    const { rows } = await db.query(`SELECT id, title FROM books`);
+    const filtered = rows.filter((choice) =>
+      choice.title.startsWith(focusedValue)
+    );
+    await interaction.respond(
+      filtered.map((choice) => ({
+        name: choice.title,
+        value: String(choice.id),
+      }))
+    );
   }
 });
 
