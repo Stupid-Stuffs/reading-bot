@@ -28,12 +28,12 @@ module.exports = {
       [user_id, book_id]
     );
     await fs.writeFile(
-      path.join(__dirname, book_id, user_id),
-      rows.join("\n"),
+      path.join(__dirname, "reviews", book_id + user_id + ".txt"),
+      rows.message.join("\n\n"),
       (e) => console.log(e)
     );
     const send_file = new AttachmentBuilder(
-      path.join(__dirname, book_id, user_id)
+      path.join(__dirname, "reviews", book_id + user_id + ".txt")
     );
     await interaction.user.send({ files: [send_file] });
     await interaction.reply("Check your inbox!");
