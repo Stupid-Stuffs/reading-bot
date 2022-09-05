@@ -21,7 +21,6 @@ module.exports = {
         .setRequired(true)
     ),
   async execute(interaction) {
-    console.log(interaction);
     const data = interaction.options.data;
     const user_id = interaction.user.id;
     const book_title = data[0].value;
