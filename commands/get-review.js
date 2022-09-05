@@ -27,6 +27,7 @@ module.exports = {
 		`,
       [user_id, book_id]
     );
+    console.log(path.join(__dirname));
     await fs.writeFile(
       path.join(__dirname, "reviews", book_id + user_id + ".txt"),
       rows.message.join("\n\n"),
