@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, AttachmentBuilder } = require("discord.js");
-const fs = require("fs");
+const fs = require("node:fs");
 const path = require("node:path");
 
 const db = require("../DB");
