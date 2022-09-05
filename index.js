@@ -241,7 +241,8 @@ client.on("interactionCreate", async (interaction) => {
   if (
     interaction.commandName === "review" ||
     interaction.commandName === "finish" ||
-    interaction.commandName === "delete"
+    interaction.commandName === "getreview" ||
+    interaction.commandName === "deletebook"
   ) {
     const focusedValue = interaction.options.getFocused();
     const { rows } = await db.query(`SELECT id, title FROM books`);
